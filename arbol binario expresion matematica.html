@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+  class Nodo{
+    constructor(numero){
+      this.numero = numero;
+      this.izquierda = null;
+      this.derecha = null;
+      this.siguiente = null;
+      this.ultimo = null;
+    }
+  }
+  class Arbol{
+    constructor(){
+      this.raiz = null;
+      this.nuevoraiz = null;
+      this.operacionespostorder = [];
+      this.operacionespreorder = [];
+    }
+    agregar(nuevo){
+      if (this.raiz == null){
+        this.raiz = nuevo;
+      }else{
+        let temp = this.raiz;
+        while (temp.siguiente != null){
+          temp = temp.siguiente;
+        }
+        nuevo.ultimo = temp;
+        temp.siguiente = nuevo;
+      }
+    }
+    crearArbol(){
+      let temp = this.raiz;
+      while (temp.siguiente != null){
+        if (temp.numero == '/' || temp.numero == '*'){
+          temp.derecha = temp.siguiente;
+          temp.izquierda = temp.ultimo;
+          this.nuevoraiz = temp;
+          if (temp.siguiente.siguiente != null){
+            let aux = temp.siguiente.siguiente;
+            temp.siguiente = aux;
+            aux.ultimo = temp;
+          }
+          if (temp.ultimo.ultimo != null) {
+            let aux2 = temp.ultimo.ultimo;
+            temp.ultimo = aux2;
+            aux2.siguiente = temp;
+          }
+        }
+        temp = temp.siguiente;
+      }
+      temp = this.raiz;
+      while (temp.siguiente != null){
+        if (temp.numero == '+' || temp.numero == '-'){
+          temp.derecha = temp.siguiente;
+          temp.izquierda = temp.ultimo;
+          this.nuevoraiz = temp;
+          if (temp.siguiente.siguiente != null) {
+            let aux = temp.siguiente.siguiente;
+            temp.siguiente = aux;
+            aux.ultimo = temp;
+          }
+          if (temp.ultimo.ultimo != null) {
+            let aux2 = temp.ultimo.ultimo;
+            temp.ultimo = aux2;
+            aux2.siguiente = temp;
+          }
+        }
+        temp = temp.siguiente;
+      }
+    }
+    _agregarRec(nuevo, nodox) {
+      if (nuevo.numero < nodox.numero){
+        if (nodox.izquierda == null){
+          nodox.izquierda = nuevo;
+        }else{
+          this._agregarRec(nuevo, nodox.izquierda);
+        }
+      }else{
+        if (nodox.derecha == null){
+          nodox.derecha = nuevo;
+        }else{
+          this._agregarRec(nuevo, nodox.derecha);
+        }
+      }
+    }
+    inorder(){
+      if (this.raiz == null){
+        return null;
+      }else{
+        this._inOrder(this.nuevoraiz);
+      }
+    }
+    _inOrder(nodox){
+      if (nodox.izquierda != null)
+      this._inOrder(nodox.izquierda);
+      console.log(nodox.numero);
+      if (nodox.derecha)
+      this._inOrder(nodox.derecha);
+    }
+    preorder() {
+      if (this.nuevoraiz == null) {
+        return null;
+      }else{
+        this._preorder(this.nuevoraiz);
+      }
+    }
+    _preorder(nodox){
+      if(nodox !== null){
+        console.log(nodox.numero);
+        this.operacionespreorder.push(nodox.numero);
+        this._preorder(nodox.izquierda);
+        this._preorder(nodox.derecha);
+      }
+    }
+    postorder(){
+      if (this.nuevoraiz == null) {
+        return null;
+      }else{
+        this._postorder(this.nuevoraiz);
+      }
+    }
+    _postorder(nodox){
+      if(nodox !== null){
+        this._postorder(nodox.izquierda);
+        this._postorder(nodox.derecha);
+        console.log(nodox.numero);
+        this.operacionespostorder.push(nodox.numero);
+      }
+    }
+    solucionpostorder() {
+      let aux = [];
+      let derecha = 0;
+      let izquierda = 0;
+      let operador = '';
+      for (let i = 0; i <= this.operacionespostorder.length - 1; i++){
+        if (typeof (this.operacionespostorder[0]) == 'number') {
+          aux.push(this.operacionespostorder[0]);
+          for (let j = 0; j <= this.operacionespostorder.length - 1; j++){
+            this.operacionespostorder[j] = this.operacionespostorder[j + 1];
+          }
+          this.operacionespostorder[this.operacionespostorder.length - 1] = null;
+        }else{
+          derecha = aux.pop();
+          operador = this.operacionespostorder[0];
+          for (let j = 0; j <= this.operacionespostorder.length - 1; j++){
+            this.operacionespostorder[j] = this.operacionespostorder[j + 1];
+          }
+          this.operacionespostorder[this.operacionespostorder.length - 1] = null;
+          izquierda = aux.pop();
+          switch (operador){
+            case '/':
+            derecha = izquierda / derecha;
+            aux.push(derecha);
+            break;
+            case '*':
+            derecha = izquierda * derecha;
+            aux.push(derecha);
+            break;
+            case '+':
+            derecha = izquierda + derecha;
+            aux.push(derecha);
+            break;
+            case '-':
+            derecha = izquierda - derecha;
+            aux.push(derecha);
+            break;
+          }
+        }
+      }
+      return derecha;
+    }
+    solucionpreorder() {
+      let aux = [];
+      let derecha = 0
+      let izquierda = 0;
+      let operador = '';
+      let resultado = 0;
+      for (let i = this.operacionespreorder.length - 1; i >= 0; i--){
+        if (typeof (this.operacionespreorder[i]) == 'number') {
+          aux.push(this.operacionespreorder.pop());
+        } else {
+          izquierda = aux.pop();
+          operador = this.operacionespreorder[i];
+          this.operacionespreorder.pop();
+          derecha = aux.pop();
+          switch (operador) {
+            case '/':
+            resultado = izquierda / derecha;
+            aux.push(resultado);
+            break;
+            case '*':
+            resultado = izquierda * derecha;
+            aux.push(resultado);
+            break;
+            case '+':
+            resultado = izquierda + derecha;
+            aux.push(resultado);
+            break;
+            case '-':
+            resultado = izquierda - derecha;
+            aux.push(resultado);
+            break;
+          }
+        }
+      }
+      resultado = aux[0];
+      return resultado;
+    }
+  }
+  let arbol = new Arbol();
+  let n1 = new Nodo(6);
+  arbol.agregar(n1);
+  n1 = new Nodo("-");
+  arbol.agregar(n1);
+  n1 = new Nodo(3);
+  arbol.agregar(n1);
+  n1 = new Nodo("+");
+  arbol.agregar(n1);
+  n1 = new Nodo(9);
+  arbol.agregar(n1);
+  n1 = new Nodo("-");
+  arbol.agregar(n1);
+  n1 = new Nodo(4);
+  arbol.agregar(n1);
+  n1 = new Nodo("*");
+  arbol.agregar(n1);
+  n1 = new Nodo(6);
+  arbol.agregar(n1);
+  n1 = new Nodo("/");
+  arbol.agregar(n1);
+  n1 = new Nodo(8);
+  arbol.agregar(n1);
+  n1 = new Nodo("-");
+  arbol.agregar(n1);
+  n1 = new Nodo(4);
+  arbol.agregar(n1);
+  n1 = new Nodo("*");
+  arbol.agregar(n1);
+  n1 = new Nodo(2);
+  arbol.agregar(n1);
+  n1 = new Nodo("*");
+  arbol.agregar(n1);
+  n1 = new Nodo(3);
+  arbol.agregar(n1);
+  n1 = new Nodo("/");
+  arbol.agregar(n1);
+  n1 = new Nodo(6);
+  arbol.agregar(n1);
+  arbol.crearArbol();
+  console.log("notación preorder");
+  arbol.preorder();
+  console.log("notación postorder");
+  arbol.postorder();
+  console.log('Solucion con preorder');
+  console.log(arbol.solucionpreorder());
+  console.log('Solucion con postorder: ');
+  console.log(arbol.solucionpostorder());
+  console.log(arbol.nuevoraiz);
+  </script>
+</body>
+</html>
